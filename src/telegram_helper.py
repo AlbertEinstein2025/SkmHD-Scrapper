@@ -14,7 +14,7 @@ async def send_to_telegram(title, link):
 
     msg_leech = (
         f"⚡ /{CMD} {link or 'None'}\n"
-        f"👤 Tag: @{USER_NAME} ({USER_ID})"
+        f"Tag: @{USER_NAME} {USER_ID}"
     )
 
     try:
