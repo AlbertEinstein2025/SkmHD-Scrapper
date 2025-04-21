@@ -7,13 +7,13 @@ bot = Bot(token=BOT_TOKEN)
 async def send_to_telegram(title, link):
     msg_default = (
         f"🎬 <b>New Post Just Dropped!</b>\n\n"
-        f"📌 <b>Title:</b> {title}\n"
-        f"🔗 <b>Download:</b> {link or '🚫 No GoFile Link Found'}\n"
-        f"🌐 <i>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></i>"
+        f"📌 <b>Title:</b> <code>{title}</code>\n\n"
+        f"🔗 <b>Download:</b>\n {link or '🚫 No GoFile Link Found'}\n\n"
+        f"🌐 <b>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></b>"
     )
 
     msg_leech = (
-        f"⚡ /{CMD} {link or 'None'}\n"
+        f"/{CMD} {link or 'None'}\n"
         f"Tag: @{USER_NAME} {USER_ID}"
     )
 
