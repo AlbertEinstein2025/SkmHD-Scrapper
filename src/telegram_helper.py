@@ -18,11 +18,11 @@ async def send_to_telegram(title, link):
     )
 
     try:
-        await bot.send_message(chat_id=CHAT_ID[0], text=msg_default)
+        await bot.send_message(chat_id=CHAT_ID[0], text=msg_default, parse_mode="HTML", disable_web_page_preview=True)
         logging.info("✅ Sent to Update Channel")
 
         if link:  # Only send to CHAT_ID[1] if there is a link
-            await bot.send_message(chat_id=CHAT_ID[1], text=msg_leech)
+            await bot.send_message(chat_id=CHAT_ID[1], text=msg_leech, parse_mode="HTML")
             logging.info("✅ Sent to Leech Channel")
 
     except Exception as e:
