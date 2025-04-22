@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from .config import BASE_URL, HEADERS
 from .telegram_helper import send_to_telegram
+from .hubcloud import get_hubcloud_direct_link
 
 sent_posts = set()
 
@@ -34,25 +35,23 @@ def extract_all_drive_links_from_page(url):
         resp = requests.get(url, headers=HEADERS, timeout=15)
         soup = BeautifulSoup(resp.text, "html.parser")
         for a in soup.find_all("a", href=True):
-            href = a['href'].strip()
+            href = a.get('href', '').strip()  # Ensure href is safely retrieved
             if href.startswith("http") and any(domain in href for domain in [
                 "hubdrive", "hubcloud", "gdflix", "gdtot", "filepress", "media.cm", "drive.google"
             ]):
                 if href not in all_links:
                     all_links.append(href)
-                # if "hubcloud" in href:
-                #     direct_links = get_hubcloud_direct_link(href)
-                #     if direct_links:
-                #         hubcloud_link.extend(direct_links)
-                #     else:
-                #         logging.warning(f"⚠️ HubCloud link could not be resolved: {href}")
+                # Check if the current href is a HubCloud URL
                 if "hubcloud" in href:
-                    logging.info(f"🔍 Calling HubCloud with href: {href}")
-                    from .hubcloud import get_hubcloud_direct_link
                     direct_links = get_hubcloud_direct_link(href)
+                    if direct_links:
+                        hubcloud_link.extend(direct_links)
+                    else:
+                        logging.warning(f"⚠️ HubCloud link could not be resolved: {href}")
     except Exception as e:
         logging.error(f"❌ Error extracting all links: {e}")
     return all_links, hubcloud_link
+
 
 async def fetch_latest_posts():
     try:
