@@ -33,7 +33,7 @@ def get_download_links_from_redirect(redirect_url):
         time.sleep(5)
 
         download_links = driver.find_elements(By.XPATH,
-            "//a[contains(@href, 'pixeldrain.net') or contains(@href, 'r2.dev') or contains(@href, 'gpdl.')]"
+            "//a[contains(@href, 'pixeldrain.net') or contains(@href, 'gpdl.') or contains(@href, 'r2.dev')]"
         )
 
         if not download_links:
