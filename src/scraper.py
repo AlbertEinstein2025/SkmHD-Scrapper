@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from .config import BASE_URL, HEADERS
 from .telegram_helper import send_to_telegram
+from hubcloud import get_hubcloud_direct_link
 
 sent_posts = set()
 
@@ -40,13 +41,16 @@ def extract_all_drive_links_from_page(url):
             ]):
                 if href not in all_links:
                     all_links.append(href)
+                # if "hubcloud" in href:
+                #     direct_links = get_hubcloud_direct_link(href)
+                #     if direct_links:
+                #         hubcloud_link.extend(direct_links)
+                #     else:
+                #         logging.warning(f"⚠️ HubCloud link could not be resolved: {href}")
                 if "hubcloud" in href:
+                    logging.info(f"🔍 Calling HubCloud with href: {href}")
                     from .hubcloud import get_hubcloud_direct_link
                     direct_links = get_hubcloud_direct_link(href)
-                    if direct_links:
-                        hubcloud_link.extend(direct_links)
-                    else:
-                        logging.warning(f"⚠️ HubCloud link could not be resolved: {href}")
     except Exception as e:
         logging.error(f"❌ Error extracting all links: {e}")
     return all_links, hubcloud_link
