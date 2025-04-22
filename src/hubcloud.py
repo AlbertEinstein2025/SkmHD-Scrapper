@@ -26,51 +26,27 @@ options.add_argument('--disable-dev-shm-usage')
 
 def get_download_links_from_redirect(redirect_url):
     """
-    Use Selenium to extract direct download links like pixeldrain, r2.dev,
-    and extract final Google Drive download link from gpdl.technorozen.workers.dev.
+    Use Selenium to extract links like pixeldrain/gpdl/r2.dev after redirection.
     """
     try:
         driver = webdriver.Chrome(options=options)
         driver.get(redirect_url)
         time.sleep(5)
 
-        # Extract all matching links from page
         download_links = driver.find_elements(By.XPATH,
             "//a[contains(@href, 'pixeldrain.net') or contains(@href, 'gpdl.') or contains(@href, 'r2.dev')]"
         )
-        urls = [link.get_attribute('href') for link in download_links]
 
-        final_urls = []
-        for url in urls:
-            if "gpdl." in url:
-                try:
-                    # Open gpdl link and get redirected final URL
-                    driver.get(url)
-                    time.sleep(5)
-                    redirected_url = driver.current_url
-                    parsed = urlparse(redirected_url)
-                    final_link = parse_qs(parsed.query).get("link", [None])[0]
-
-                    if final_link and "googleusercontent.com" in final_link:
-                        logging.info(f"✅ Final direct link from gpdl: {final_link}")
-                        final_urls.append(final_link)
-                        continue
-                except Exception as inner_e:
-                    logging.warning(f"⚠️ Failed to extract from gpdl: {inner_e}")
-                    continue
-            final_urls.append(url)
-
-        if not final_urls:
-            logging.warning("⚠️ No usable download links found.")
+        if not download_links:
+            logging.warning("⚠️ No dynamic download links found.")
             return None
 
-        logging.info(f"📎 Found final download links: {final_urls}")
-        return final_urls
-
+        urls = [link.get_attribute('href') for link in download_links]
+        logging.info(f"📎 Found dynamic download links: {urls}")
+        return urls
     except Exception as e:
         logging.error(f"❌ Selenium error: {e}")
         return None
-
     finally:
         driver.quit()
 
