@@ -12,18 +12,17 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
     msg_default = (
         f"🎬 <b>New Post Just Dropped!</b>\n\n"
         f"📌 <b>Title:</b> <code>{title}</code>\n\n"
-        f"🔗 <b>Links:</b>\n"
-        f"• <b>Watch Online:</b> \n{watch_online_link or '🚫 No Watch Online Link Found'}\n"
-        f"• <b>GoFile Download:</b> \n{gofile_link or '🚫 No GoFile Link Found'}\n"
+        f"<b>GoFile Link:</b> \n• {gofile_link or '🚫 No GoFile Link Found'}\n"
+        f"<b>Stream Tape Link:</b> \n• {watch_online_link or '🚫 No Watch Online Link Found'}\n"
     )
 
     if all_links_cleaned:
-        msg_default += "\n<b>Google Drive Links:</b>\n"
+        msg_default += "\n<b>Cloud Links:</b>\n"
         for link in all_links_cleaned:
             msg_default += f"• <a href='{link}'>{link}</a>\n"
 
     if hubcloud_links:
-        msg_default += "\n<b>HubCloud Links:</b>\n"
+        msg_default += "\n<b>HubCloud Scrapped Links:</b>\n"
         labels = ["Pixeldrain", "Fast Server 01", "Fast Server #Recommended"]
         for i, link in enumerate(hubcloud_links):
             label = labels[i] if i < len(labels) else f"Server {i+1}"
