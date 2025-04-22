@@ -94,8 +94,7 @@ def get_hubcloud_direct_link(hubcloud_url):
 
 
 # Example usage
-final_links = get_hubcloud_direct_link(hubcloud_url)
-
+final_links = get_hubcloud_direct_link(href)
 if final_links:
     logging.info("✅ Final Download Link(s):")
     for link in final_links:

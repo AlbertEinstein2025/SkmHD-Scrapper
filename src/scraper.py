@@ -41,7 +41,7 @@ def extract_all_drive_links_from_page(url):
                 if href not in all_links:
                     all_links.append(href)
                 if "hubcloud" in href:
-                    from .hubcloud import get_hubcloud_direct_link  # import inside to avoid circular deps
+                    from .hubcloud import get_hubcloud_direct_link
                     direct_links = get_hubcloud_direct_link(href)
                     if direct_links:
                         hubcloud_link.extend(direct_links)
