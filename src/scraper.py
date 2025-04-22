@@ -8,7 +8,7 @@ sent_posts = set()
 
 def get_gofile_link(intermediate_url):
     try:
-        logging.info(f"🔍 Fetching intermediate URL: {intermediate_url}")
+        logging.info(f"🔍 Fetching GoFile intermediate URL: {intermediate_url}")
         response = requests.get(intermediate_url, headers=HEADERS, timeout=15)
         if response.status_code != 200:
             logging.warning(f"⚠️ Unexpected status code: {response.status_code}")
@@ -24,6 +24,26 @@ def get_gofile_link(intermediate_url):
         return None
     except Exception as e:
         logging.error(f"❌ Error in get_gofile_link: {e}")
+        return None
+
+def get_hubcloud_link(intermediate_url):
+    try:
+        logging.info(f"🔍 Fetching HubCloud intermediate URL: {intermediate_url}")
+        response = requests.get(intermediate_url, headers=HEADERS, timeout=15)
+        if response.status_code != 200:
+            logging.warning(f"⚠️ Unexpected status code: {response.status_code}")
+            return None
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        for a in soup.find_all("a", href=True):
+            href = a['href']
+            if "hubcloud.ink" in href:
+                logging.info(f"📎 Found HubCloud link: {href}")
+                return href
+        logging.warning("⚠️ No HubCloud link found.")
+        return None
+    except Exception as e:
+        logging.error(f"❌ Error in get_hubcloud_link: {e}")
         return None
 
 async def fetch_latest_posts():
@@ -53,20 +73,38 @@ async def fetch_latest_posts():
 
                 logging.info(f"📄 Found post: {title} -> {post_url}")
 
+                watch_online_link = None
                 gofile_link = None
+                hubcloud_link = None
+
                 try:
                     post_resp = requests.get(post_url, headers=HEADERS)
                     post_soup = BeautifulSoup(post_resp.text, 'html.parser')
+                    # Watch Online Link
+                    watch_online_link_tag = post_soup.find('a', href=True, string=lambda s: s and "WATCH ONLINE" in s.upper())
+                    if watch_online_link_tag:
+                        watch_online_link = watch_online_link_tag['href']
+                        logging.info(f"📎 Found Watch Online link: {watch_online_link}")
+
+                    # SERVER 01 Link (for GoFile)
                     server01_link = post_soup.find('a', href=True, string=lambda s: s and "SERVER 01" in s.upper())
                     if server01_link:
                         intermediate_url = server01_link['href']
                         gofile_link = get_gofile_link(intermediate_url)
                     else:
                         logging.warning("⚠️ SERVER 01 link not found.")
+
+                    # HubCloud Link
+                    hubcloud_link_tag = post_soup.find('a', href=True, string=lambda s: s and "HUBCLOUD" in s.upper())
+                    if hubcloud_link_tag:
+                        hubcloud_link = get_hubcloud_link(hubcloud_link_tag['href'])
+                    else:
+                        logging.warning("⚠️ HUBCLOUD link not found.")
+
                 except Exception as e:
                     logging.error(f"❌ Error fetching post page: {e}")
 
-                await send_to_telegram(title, gofile_link or post_url)
+                await send_to_telegram(title, watch_online_link or gofile_link or hubcloud_link or post_url)
                 sent_posts.add(post_url)
                 count += 1
                 if count >= 8:
