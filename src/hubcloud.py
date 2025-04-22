@@ -94,7 +94,6 @@ def get_hubcloud_direct_link(hubcloud_url):
 
 
 # Example usage
-hubcloud_url = "https://hubcloud.ink/drive/lzw51eglu0x1nww"
 final_links = get_hubcloud_direct_link(hubcloud_url)
 
 if final_links:

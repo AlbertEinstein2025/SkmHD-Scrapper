@@ -28,7 +28,7 @@ def get_gofile_link(intermediate_url):
 
 def extract_all_drive_links_from_page(url):
     all_links = []
-    hubcloud_links = []
+    hubcloud_link = []
     try:
         logging.info(f"🔍 Extracting drive-related links from: {url}")
         resp = requests.get(url, headers=HEADERS, timeout=15)
@@ -41,10 +41,15 @@ def extract_all_drive_links_from_page(url):
                 if href not in all_links:
                     all_links.append(href)
                 if "hubcloud" in href:
-                    hubcloud_links.append(href)
+                    from .hubcloud import get_hubcloud_direct_link  # import inside to avoid circular deps
+                    direct_links = get_hubcloud_direct_link(href)
+                    if direct_links:
+                        hubcloud_link.extend(direct_links)
+                    else:
+                        logging.warning(f"⚠️ HubCloud link could not be resolved: {href}")
     except Exception as e:
         logging.error(f"❌ Error extracting all links: {e}")
-    return all_links, hubcloud_links
+    return all_links, hubcloud_link
 
 async def fetch_latest_posts():
     try:
@@ -76,7 +81,7 @@ async def fetch_latest_posts():
                 watch_online_link = None
                 gofile_link = None
                 all_links = []
-                hubcloud_links = []
+                hubcloud_link = []
 
                 try:
                     post_resp = requests.get(post_url, headers=HEADERS)
@@ -96,15 +101,15 @@ async def fetch_latest_posts():
                     # Google Drive Direct Links page
                     drive_links_tag = post_soup.find('a', href=True, string=lambda s: s and "Google Drive Direct Links" in s)
                     if drive_links_tag:
-                        all_links, hubcloud_links = extract_all_drive_links_from_page(drive_links_tag['href'])
-                        logging.info(f"📎 Extracted {len(all_links)} total drive links, {len(hubcloud_links)} HubCloud links.")
+                        all_links, hubcloud_link = extract_all_drive_links_from_page(drive_links_tag['href'])
+                        logging.info(f"📎 Extracted {len(all_links)} total drive links, {len(hubcloud_link)} HubCloud links.")
                     else:
                         logging.warning("⚠️ Google Drive Direct Links not found.")
 
                 except Exception as e:
                     logging.error(f"❌ Error fetching post page: {e}")
 
-                await send_to_telegram(title, watch_online_link, gofile_link, all_links, hubcloud_links)
+                await send_to_telegram(title, watch_online_link, gofile_link, all_links, hubcloud_link)
                 sent_posts.add(post_url)
                 count += 1
                 if count >= 2:
