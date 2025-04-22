@@ -98,7 +98,7 @@ async def fetch_latest_posts():
                         all_links, hubcloud_links = extract_all_drive_links_from_page(drive_links_tag['href'])
                         logging.info(f"📎 Extracted {len(all_links)} total drive links, {len(hubcloud_links)} HubCloud links.")
                         for hub_link in hubcloud_links:
-                            hubcloud_directs.extend(resolve_hubcloud_direct_links(hub_link))
+                            hubcloud_directs.extend(hubcloud_direct_links(hub_link))
                     else:
                         logging.warning("⚠️ Google Drive Direct Links not found.")
 

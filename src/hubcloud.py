@@ -42,5 +42,5 @@ def hubcloud_direct_links(url):
 
         return final_links
     except Exception as e:
-        logging.error(f"❌ Error in resolve_hubcloud_direct_links: {e}")
+        logging.error(f"❌ Error in hubcloud_direct_links: {e}")
         return []
