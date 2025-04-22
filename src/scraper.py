@@ -119,7 +119,7 @@ async def fetch_latest_posts():
                     server01_tag = post_soup.find('a', href=True, string=lambda s: s and "SERVER 01" in s.upper())
                     if server01_tag:
                         gofile_link = get_gofile_link(server01_tag['href'])
-                        watch_online_link = get_gofile_link(server01_tag['href'])
+                        watch_online_link = get_streamtape_link(server01_tag['href'])
 
                     # Google Drive Direct Links page
                     drive_links_tag = post_soup.find('a', href=True, string=lambda s: s and "Google Drive Direct Links" in s)

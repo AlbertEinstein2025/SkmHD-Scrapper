@@ -13,8 +13,8 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
         f"🎬 <b>New Post Just Dropped!</b>\n\n"
         f"📌 <b>Title:</b> <code>{title}</code>\n\n"
         f"🔗 <b>Links:</b>\n"
-        f"• <b>Watch Online:</b> {watch_online_link or '🚫 No Watch Online Link Found'}\n"
-        f"• <b>GoFile Download:</b> {gofile_link or '🚫 No GoFile Link Found'}\n"
+        f"• <b>Watch Online:</b> \n{watch_online_link or '🚫 No Watch Online Link Found'}\n"
+        f"• <b>GoFile Download:</b> \n{gofile_link or '🚫 No GoFile Link Found'}\n"
     )
 
     if all_links_cleaned:
