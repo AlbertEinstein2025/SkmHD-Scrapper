@@ -10,11 +10,13 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
 
     # Message for the update channel
     msg_default = (
-        f"🎬 <b>New Post Just Dropped! ✅</b>\n\n"
-        f"📌 <b>Title:</b> <code>{title}</code>\n\n"
-        f"<b>🔰GoFile Link🔰</b> \n• {gofile_link or '🚫 No GoFile Link Found'}\n\n"
-        f"<b>🐬Stream Tape Link🐬</b> \n• {watch_online_link or '🚫 No Watch Online Link Found'}\n"
+    f"🎬 <b>New Post Just Dropped! ✅</b>\n\n"
+    f"📌 <b>Title:</b> <code>{title}</code>\n\n"
+    f"<b>🔰GoFile Link🔰</b> \n• {gofile_link or '🚫 No GoFile Link Found'}\n"
     )
+
+    if watch_online_link:
+        msg_default += f"\n<b>🐬Stream Tape Link🐬</b> \n• {watch_online_link}\n"
 
     if hubcloud_links:
         msg_default += "\n<b>🚀HubCloud Scraped Links🚀</b>\n"
@@ -30,9 +32,10 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
 
     msg_default += "\n<blockquote>🌐 <b>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></b></blockquote>"
 
-    # Message for the leech channel
+    fast_server_link = hubcloud_links[2] if len(hubcloud_links) > 2 else gofile_link or 'None'
+
     msg_leech = (
-        f"/{CMD} {gofile_link or 'None'}\n"
+        f"/{CMD} {fast_server_link}\n"
         f"Tag: @{USER_NAME} {USER_ID}"
     )
 

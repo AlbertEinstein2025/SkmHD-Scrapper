@@ -1,11 +1,14 @@
 import logging
 import requests
 from bs4 import BeautifulSoup
-from .config import BASE_URL, HEADERS
+from .config import HEADERS
 from .telegram_helper import send_to_telegram
 from .hubcloud import get_hubcloud_direct_link
+from .domain_fetcher import  fetch_current_domain
 
 sent_posts = set()
+
+BASE_URL = fetch_current_domain()
 
 def get_gofile_link(intermediate_url):
     try:
