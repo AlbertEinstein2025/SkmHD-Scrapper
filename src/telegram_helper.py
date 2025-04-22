@@ -12,7 +12,7 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
     msg_default = (
         f"🎬 <b>New Post Just Dropped! ✅</b>\n\n"
         f"📌 <b>Title:</b> <code>{title}</code>\n\n"
-        f"<b>🔰GoFile Link🔰</b> \n• {gofile_link or '🚫 No GoFile Link Found'}\n"
+        f"<b>🔰GoFile Link🔰</b> \n• {gofile_link or '🚫 No GoFile Link Found'}\n\n"
         f"<b>🐬Stream Tape Link🐬</b> \n• {watch_online_link or '🚫 No Watch Online Link Found'}\n"
     )
 
