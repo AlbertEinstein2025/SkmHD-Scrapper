@@ -27,6 +27,26 @@ def get_gofile_link(intermediate_url):
         logging.error(f"❌ Error in get_gofile_link: {e}")
         return None
 
+def get_streamtape_link(intermediate_url):
+    try:
+        logging.info(f"🔍 Fetching StreamTape intermediate URL: {intermediate_url}")
+        response = requests.get(intermediate_url, headers=HEADERS, timeout=15)
+        if response.status_code != 200:
+            logging.warning(f"⚠️ Unexpected status code: {response.status_code}")
+            return None
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        for a in soup.find_all("a", href=True):
+            href = a['href']
+            if "streamtape.to" in href:
+                logging.info(f"📎 Found StreamTape link: {href}")
+                return href
+        logging.warning("⚠️ No StreamTape link found.")
+        return None
+    except Exception as e:
+        logging.error(f"❌ Error in get_streamtape_link: {e}")
+        return None
+
 def extract_all_drive_links_from_page(url):
     all_links = []
     hubcloud_link = []
@@ -89,16 +109,17 @@ async def fetch_latest_posts():
                     post_resp = requests.get(post_url, headers=HEADERS)
                     post_soup = BeautifulSoup(post_resp.text, 'html.parser')
 
-                    # Watch Online
-                    watch_online_tag = post_soup.find('a', href=True, string=lambda s: s and "WATCH ONLINE" in s.upper())
-                    if watch_online_tag:
-                        watch_online_link = watch_online_tag['href']
-                        logging.info(f"📎 Found Watch Online link: {watch_online_link}")
+                    # # Watch Online
+                    # watch_online_tag = post_soup.find('a', href=True, string=lambda s: s and "WATCH ONLINE" in s.upper())
+                    # if watch_online_tag:
+                    #     watch_online_link = watch_online_tag['href']
+                    #     logging.info(f"📎 Found Watch Online link: {watch_online_link}")
 
                     # GoFile (from SERVER 01)
                     server01_tag = post_soup.find('a', href=True, string=lambda s: s and "SERVER 01" in s.upper())
                     if server01_tag:
                         gofile_link = get_gofile_link(server01_tag['href'])
+                        watch_online_link = get_gofile_link(server01_tag['href'])
 
                     # Google Drive Direct Links page
                     drive_links_tag = post_soup.find('a', href=True, string=lambda s: s and "Google Drive Direct Links" in s)
