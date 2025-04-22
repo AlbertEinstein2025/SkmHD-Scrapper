@@ -18,9 +18,8 @@ def get_fresh_driver():
 
 def hubcloud_direct_links(url):
     try:
-        print("🔁 Trying to get direct HubCloud link with Selenium...")
+        logging.info("🔁 Trying to get direct HubCloud link with Selenium...")
         driver = get_fresh_driver()
-        driver.get(url)
         logging.info(f"📎 Found redirect URL: {url}")
         response = requests.get(url, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
