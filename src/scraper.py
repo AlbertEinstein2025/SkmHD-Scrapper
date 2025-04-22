@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 from .config import BASE_URL, HEADERS
 from .telegram_helper import send_to_telegram
-from .hubcloud import hubcloud_direct_links
 
 sent_posts = set()
 
@@ -78,34 +77,34 @@ async def fetch_latest_posts():
                 gofile_link = None
                 all_links = []
                 hubcloud_links = []
-                hubcloud_directs = []
 
                 try:
                     post_resp = requests.get(post_url, headers=HEADERS)
                     post_soup = BeautifulSoup(post_resp.text, 'html.parser')
 
+                    # Watch Online
                     watch_online_tag = post_soup.find('a', href=True, string=lambda s: s and "WATCH ONLINE" in s.upper())
                     if watch_online_tag:
                         watch_online_link = watch_online_tag['href']
                         logging.info(f"📎 Found Watch Online link: {watch_online_link}")
 
+                    # GoFile (from SERVER 01)
                     server01_tag = post_soup.find('a', href=True, string=lambda s: s and "SERVER 01" in s.upper())
                     if server01_tag:
                         gofile_link = get_gofile_link(server01_tag['href'])
 
+                    # Google Drive Direct Links page
                     drive_links_tag = post_soup.find('a', href=True, string=lambda s: s and "Google Drive Direct Links" in s)
                     if drive_links_tag:
                         all_links, hubcloud_links = extract_all_drive_links_from_page(drive_links_tag['href'])
                         logging.info(f"📎 Extracted {len(all_links)} total drive links, {len(hubcloud_links)} HubCloud links.")
-                        for hub_link in hubcloud_links:
-                            hubcloud_directs.extend(hubcloud_direct_links(hub_link))
                     else:
                         logging.warning("⚠️ Google Drive Direct Links not found.")
 
                 except Exception as e:
                     logging.error(f"❌ Error fetching post page: {e}")
 
-                await send_to_telegram(title, watch_online_link, gofile_link, all_links + hubcloud_directs, hubcloud_links)
+                await send_to_telegram(title, watch_online_link, gofile_link, all_links, hubcloud_links)
                 sent_posts.add(post_url)
                 count += 1
                 if count >= 2:

@@ -1,59 +1,105 @@
-import logging
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import logging
 import time
-import tempfile
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
-def get_fresh_driver():
-    temp_user_data = tempfile.mkdtemp()
-    chrome_options = Options()
-    chrome_options.add_argument(f"--user-data-dir={temp_user_data}")
-    chrome_options.add_argument("--headless=new")  # Optional: use old "--headless" if needed
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    return webdriver.Chrome(options=chrome_options)
+# Logging setup
+logging.basicConfig(level=logging.INFO)
 
-def hubcloud_direct_links(url):
+# Headers for requests
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+}
+
+# Setup Selenium options
+options = Options()
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
+options.add_argument('start-maximized')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+
+
+def get_download_links_from_redirect(redirect_url):
+    """
+    Use Selenium to extract links like pixeldrain/gpdl/r2.dev after redirection.
+    """
     try:
-        logging.info("🔁 Trying to get direct HubCloud link with Selenium...")
-        driver = get_fresh_driver()
-        logging.info(f"📎 Found redirect URL: {url}")
-        response = requests.get(url, timeout=10)
-        soup = BeautifulSoup(response.text, "html.parser")
+        driver = webdriver.Chrome(options=options)
+        driver.get(redirect_url)
+        time.sleep(5)
 
-        links = [a['href'] for a in soup.find_all("a", href=True) if "pixeldrain" in a['href'] or "r2.dev" in a['href']]
-        if links:
-            logging.info("✅ Found direct links without JS rendering.")
-            return links
+        download_links = driver.find_elements(By.XPATH,
+            "//a[contains(@href, 'pixeldrain.net') or contains(@href, 'gpdl.') or contains(@href, 'r2.dev')]"
+        )
 
-        logging.warning("⚠️ Direct download link not found.")
-        logging.info("🔁 Falling back to Selenium for dynamic content...")
+        if not download_links:
+            logging.warning("⚠️ No dynamic download links found.")
+            return None
 
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.get(url)
-        time.sleep(7)
-
-        elems = driver.find_elements("xpath", "//a[contains(@href, 'pixeldrain') or contains(@href, 'r2.dev') or contains(@href, 'workers.dev')]")
-        final_links = [e.get_attribute("href") for e in elems if e.get_attribute("href")]
-
+        urls = [link.get_attribute('href') for link in download_links]
+        logging.info(f"📎 Found dynamic download links: {urls}")
+        return urls
+    except Exception as e:
+        logging.error(f"❌ Selenium error: {e}")
+        return None
+    finally:
         driver.quit()
 
-        if final_links:
-            logging.info("✅ Final Download Link(s):")
-            for link in final_links:
-                logging.info(link)
-        else:
-            logging.warning("⚠️ No download links found via Selenium.")
 
-        return final_links
+def get_hubcloud_direct_link(hubcloud_url):
+    """
+    First try static scraping. If that fails, use Selenium.
+    """
+    try:
+        response = requests.get(hubcloud_url, headers=HEADERS, timeout=15)
+        if response.status_code != 200:
+            logging.warning(f"⚠️ Cannot access HubCloud page: {response.status_code}")
+            return None
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+        generate_button = soup.find("a", id="download", href=True)
+
+        if not generate_button:
+            logging.warning("⚠️ 'Generate Direct Download Link' button not found.")
+            return None
+        
+        redirect_url = generate_button['href']
+        logging.info(f"📎 Found redirect URL: {redirect_url}")
+
+        # Try static redirect fetch first
+        redirect_response = requests.get(redirect_url, headers=HEADERS, timeout=15)
+        if redirect_response.status_code != 200:
+            logging.warning("⚠️ Failed to load redirect page.")
+            return None
+
+        redirect_soup = BeautifulSoup(redirect_response.text, "html.parser")
+        static_link = redirect_soup.find("a", class_="btn btn-primary h6 p-2", href=True)
+        
+        if static_link:
+            final_url = static_link['href']
+            logging.info(f"📎 Found static direct link: {final_url}")
+            return [final_url]
+        
+        # If static link failed, fallback to Selenium
+        logging.info("🔁 Falling back to Selenium for dynamic content...")
+        return get_download_links_from_redirect(redirect_url)
+
     except Exception as e:
-        logging.error(f"❌ Error in hubcloud_direct_links: {e}")
-        return []
+        logging.error(f"❌ Error in get_hubcloud_direct_link: {e}")
+        return None
+
+
+# Example usage
+hubcloud_url = "https://hubcloud.ink/drive/lzw51eglu0x1nww"
+final_links = get_hubcloud_direct_link(hubcloud_url)
+
+if final_links:
+    logging.info("✅ Final Download Link(s):")
+    for link in final_links:
+        logging.info(link)
+else:
+    logging.warning("⚠️ No download links extracted.")
