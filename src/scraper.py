@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 from .config import BASE_URL, HEADERS
 from .telegram_helper import send_to_telegram
-from hubcloud import get_hubcloud_direct_link
 
 sent_posts = set()
 
