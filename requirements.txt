@@ -1,4 +1,6 @@
 requests
+selenium
+bs4
 beautifulsoup4
 python-telegram-bot
 pyrofork
