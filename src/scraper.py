@@ -82,7 +82,7 @@ async def fetch_latest_posts():
                     post_soup = BeautifulSoup(post_resp.text, 'html.parser')
 
                     # Fetch Watch Online link
-                    watch_online_link_tag = post_soup.find('a', href=True, string=lambda s: s and "Watch Online" in s)
+                    watch_online_link_tag = post_soup.find('a', href=True, string=lambda s: s and "WATCH ONLINE" in s)
                     if watch_online_link_tag:
                         watch_online_link = watch_online_link_tag['href']
                         logging.info(f"📎 Found Watch Online link: {watch_online_link}")
@@ -95,7 +95,7 @@ async def fetch_latest_posts():
                     else:
                         logging.warning("⚠️ SERVER 01 link not found.")
 
-                    # Fetch HubCloud link (implement similar logic for HubCloud if possible)
+                    # Fetch HubCloud link
                     hubcloud_link_tag = post_soup.find('a', href=True, string=lambda s: s and "HubCloud" in s)
                     if hubcloud_link_tag:
                         hubcloud_link = hubcloud_link_tag['href']
