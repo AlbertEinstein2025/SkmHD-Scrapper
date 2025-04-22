@@ -4,7 +4,7 @@ from .config import BOT_TOKEN, CHAT_ID, CMD, USER_NAME, USER_ID
 
 bot = Bot(token=BOT_TOKEN)
 
-async def send_to_telegram(title, watch_online_link, gofile_link, hubcloud_link):
+async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hubcloud_links):
     # Default message with all possible links
     msg_default = (
         f"🎬 <b>New Post Just Dropped!</b>\n\n"
@@ -12,8 +12,23 @@ async def send_to_telegram(title, watch_online_link, gofile_link, hubcloud_link)
         f"🔗 <b>Links:</b>\n"
         f"• <b>Watch Online:</b> {watch_online_link or '🚫 No Watch Online Link Found'}\n"
         f"• <b>GoFile Download:</b> {gofile_link or '🚫 No GoFile Link Found'}\n"
-        f"• <b>HubCloud Download:</b> {hubcloud_link or '🚫 No HubCloud Link Found'}\n\n"
-        f"🌐 <b>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></b>"
+    )
+    
+    # If there are any Google Drive Direct links (all_links), add them
+    if all_links:
+        msg_default += "\n<b>Google Drive Links:</b>\n"
+        for link in all_links:
+            msg_default += f"• <a href='{link}'>{link}</a>\n"
+
+    # If there are any HubCloud links, add them
+    if hubcloud_links:
+        msg_default += "\n<b>HubCloud Links:</b>\n"
+        for link in hubcloud_links:
+            msg_default += f"• <a href='{link}'>{link}</a>\n"
+    
+    # Final message footer
+    msg_default += (
+        f"\n🌐 <b>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></b>"
     )
 
     # Special message for Leech channel
