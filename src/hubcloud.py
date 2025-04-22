@@ -91,13 +91,3 @@ def get_hubcloud_direct_link(hubcloud_url):
     except Exception as e:
         logging.error(f"❌ Error in get_hubcloud_direct_link: {e}")
         return None
-
-
-# Example usage
-final_links = get_hubcloud_direct_link(href)
-if final_links:
-    logging.info("✅ Final Download Link(s):")
-    for link in final_links:
-        logging.info(link)
-else:
-    logging.warning("⚠️ No download links extracted.")
