@@ -16,17 +16,17 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
         f"<b>Stream Tape Link:</b> \n• {watch_online_link or '🚫 No Watch Online Link Found'}\n"
     )
 
-    if all_links_cleaned:
-        msg_default += "\n<b>Cloud Links:</b>\n"
-        for link in all_links_cleaned:
-            msg_default += f"• <a href='{link}'>{link}</a>\n"
-
     if hubcloud_links:
         msg_default += "\n<b>HubCloud Scrapped Links:</b>\n"
         labels = ["Pixeldrain", "Fast Server 01", "Fast Server #Recommended"]
         for i, link in enumerate(hubcloud_links):
             label = labels[i] if i < len(labels) else f"Server {i+1}"
             msg_default += f"• <a href='{link}'>{label}</a>\n"
+            
+    if all_links_cleaned:
+        msg_default += "\n<b>All Cloud Links:</b>\n"
+        for link in all_links_cleaned:
+            msg_default += f"• <a href='{link}'>{link}</a>\n"
 
     msg_default += "\n🌐 <b>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></b>"
 
