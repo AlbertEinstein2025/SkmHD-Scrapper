@@ -4,9 +4,23 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
+import tempfile
+
+def get_fresh_driver():
+    temp_user_data = tempfile.mkdtemp()
+    chrome_options = Options()
+    chrome_options.add_argument(f"--user-data-dir={temp_user_data}")
+    chrome_options.add_argument("--headless=new")  # Optional: use old "--headless" if needed
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    return webdriver.Chrome(options=chrome_options)
 
 def hubcloud_direct_links(url):
     try:
+        print("🔁 Trying to get direct HubCloud link with Selenium...")
+        driver = get_fresh_driver()
+        driver.get(url)
         logging.info(f"📎 Found redirect URL: {url}")
         response = requests.get(url, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
