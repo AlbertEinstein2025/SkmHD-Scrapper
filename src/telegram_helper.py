@@ -10,9 +10,9 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
 
     # Message for the update channel
     msg_default = (
-    f"🎬 <b>New Post Just Dropped! ✅</b>\n\n"
-    f"📌 <b>Title:</b> <code>{title}</code>\n\n"
-    f"<b>🔰GoFile Link🔰</b> \n• {gofile_link or '🚫 No GoFile Link Found'}\n"
+        f"🎬 <b>New Post Just Dropped! ✅</b>\n\n"
+        f"📌 <b>Title:</b> <code>{title}</code>\n\n"
+        f"<b>🔰GoFile Link🔰</b> \n• {gofile_link or '🚫 No GoFile Link Found'}\n"
     )
 
     if watch_online_link:
@@ -20,9 +20,15 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
 
     if hubcloud_links:
         msg_default += "\n<b>🚀HubCloud Scraped Links🚀</b>\n"
-        labels = ["Pixeldrain", "Google Server", "Fast Server"]
-        for i, link in enumerate(hubcloud_links):
-            label = labels[i] if i < len(labels) else f"Server {i+1}"
+        for link in hubcloud_links:
+            if "pixeldrain.net" in link:
+                label = "Pixeldrain"
+            elif "techrozen.workers.dev" in link:
+                label = "Google Server"
+            elif "r2.dev" in link:
+                label = "Fast Server"
+            else:
+                label = "Server"
             msg_default += f"• <a href='{link}'>{label}</a>\n"
 
     if all_links_cleaned:
@@ -32,8 +38,10 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
 
     msg_default += "\n<blockquote>🌐 <b>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></b></blockquote>"
 
-    fast_server_link = hubcloud_links[2] if len(hubcloud_links) > 2 else gofile_link or 'None'
+    # Choose a fast server link
+    fast_server_link = next((l for l in hubcloud_links if "r2.dev" in l), gofile_link or 'None')
 
+    # Message to Leech Channel
     msg_leech = (
         f"/{CMD} {fast_server_link}\n"
         f"Tag: @{USER_NAME} {USER_ID}"
