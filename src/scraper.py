@@ -138,7 +138,7 @@ async def fetch_latest_posts():
                 await send_to_telegram(title, watch_online_link, gofile_link, all_links, hubcloud_link)
                 sent_posts.add(post_url)
                 count += 1
-                if count >= 8:
+                if count >= 6:
                     break
 
     except Exception as e:
