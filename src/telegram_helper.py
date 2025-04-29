@@ -23,12 +23,12 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
         for link in hubcloud_links:
             if "pixeldrain.net" in link:
                 label = "Pixeldrain"
-            elif "techrozen.workers.dev" in link:
+            elif "workers.dev" in link:
                 label = "Google Server"
             elif "r2.dev" in link:
                 label = "Fast Server"
             else:
-                label = "Server"
+                label = "Fast Server 2"
             msg_default += f"• <a href='{link}'>{label}</a>\n"
 
     if all_links_cleaned:
