@@ -5,6 +5,8 @@ from .config import HEADERS
 from .telegram_helper import send_to_telegram
 from .hubcloud import get_hubcloud_direct_link
 from .domain_fetcher import  fetch_current_domain
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sent_posts = set()
 
