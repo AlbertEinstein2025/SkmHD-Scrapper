@@ -13,7 +13,7 @@ BASE_URL = fetch_current_domain()
 def get_gofile_link(intermediate_url):
     try:
         logging.info(f"🔍 Fetching GoFile intermediate URL: {intermediate_url}")
-        response = requests.get(intermediate_url, headers=HEADERS, timeout=15)
+        response = requests.get(intermediate_url, headers=HEADERS, verify=False, timeout=15)
         if response.status_code != 200:
             logging.warning(f"⚠️ Unexpected status code: {response.status_code}")
             return None
@@ -33,7 +33,7 @@ def get_gofile_link(intermediate_url):
 def get_streamtape_link(intermediate_url):
     try:
         logging.info(f"🔍 Fetching StreamTape intermediate URL: {intermediate_url}")
-        response = requests.get(intermediate_url, headers=HEADERS, timeout=15)
+        response = requests.get(intermediate_url, headers=HEADERS, verify=False, timeout=15)
         if response.status_code != 200:
             logging.warning(f"⚠️ Unexpected status code: {response.status_code}")
             return None
@@ -55,7 +55,7 @@ def extract_all_drive_links_from_page(url):
     hubcloud_link = []
     try:
         logging.info(f"🔍 Extracting drive-related links from: {url}")
-        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp = requests.get(url, headers=HEADERS, verify=False, timeout=15)
         soup = BeautifulSoup(resp.text, "html.parser")
         for a in soup.find_all("a", href=True):
             href = a.get('href', '').strip()  # Ensure href is safely retrieved
@@ -109,7 +109,7 @@ async def fetch_latest_posts():
                 hubcloud_link = []
 
                 try:
-                    post_resp = requests.get(post_url, headers=HEADERS)
+                    post_resp = requests.get(post_url, headers=HEADERS, verify=False)
                     post_soup = BeautifulSoup(post_resp.text, 'html.parser')
 
                     # # Watch Online
