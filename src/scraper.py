@@ -78,6 +78,7 @@ def extract_all_drive_links_from_page(url):
 
 async def fetch_latest_posts():
     try:
+        logging.info("Inside Website:{BASE_URL}")
         logging.info("🔁 Checking for latest posts...")
         response = requests.get(BASE_URL, headers=HEADERS)
         soup = BeautifulSoup(response.text, 'html.parser')
