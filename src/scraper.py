@@ -78,9 +78,8 @@ def extract_all_drive_links_from_page(url):
 
 async def fetch_latest_posts():
     try:
-        logging.info(f"Inside Website:{BASE_URL}")
         logging.info("🔁 Checking for latest posts...")
-        response = requests.get(BASE_URL, headers=HEADERS)
+        response = requests.get(BASE_URL, headers=HEADERS, verify=False)
         soup = BeautifulSoup(response.text, 'html.parser')
 
         marker = soup.find('div', class_='Robiul', string=lambda s: 'Latest Updated Movies' in s)
