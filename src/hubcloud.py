@@ -56,7 +56,7 @@ def get_hubcloud_direct_link(hubcloud_url):
     First try static scraping. If that fails, use Selenium.
     """
     try:
-        response = requests.get(hubcloud_url, headers=HEADERS, verify=False, timeout=15)
+        response = requests.get(hubcloud_url, headers=HEADERS, timeout=15)
         if response.status_code != 200:
             logging.warning(f"⚠️ Cannot access HubCloud page: {response.status_code}")
             return None
@@ -72,7 +72,7 @@ def get_hubcloud_direct_link(hubcloud_url):
         logging.info(f"📎 Found redirect URL: {redirect_url}")
 
         # Try static redirect fetch first
-        redirect_response = requests.get(redirect_url, headers=HEADERS, verify=False, timeout=15)
+        redirect_response = requests.get(redirect_url, headers=HEADERS, timeout=15)
         if redirect_response.status_code != 200:
             logging.warning("⚠️ Failed to load redirect page.")
             return None
