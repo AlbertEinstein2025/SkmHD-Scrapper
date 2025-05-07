@@ -1,15 +1,43 @@
 import logging
 import requests
+import json
+import os
+import time
 from bs4 import BeautifulSoup
 from .config import HEADERS
 from .telegram_helper import send_to_telegram
 from .hubcloud import get_hubcloud_direct_link
-from .domain_fetcher import  fetch_current_domain
+from .domain_fetcher import fetch_current_domain
 import urllib3
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-sent_posts = set()
+# Expiry settings
+EXPIRY_SECONDS = 72 * 3600  # 72 hours
+SENT_POSTS_FILE = "sent_posts.json"
 
+# Load sent posts with expiry check
+def load_sent_posts():
+    if os.path.exists(SENT_POSTS_FILE):
+        try:
+            with open(SENT_POSTS_FILE, "r") as f:
+                data = json.load(f)
+                now = time.time()
+                return {url: ts for url, ts in data.items() if now - ts < EXPIRY_SECONDS}
+        except Exception as e:
+            logging.error(f"❌ Failed to load sent posts: {e}")
+    return {}
+
+# Save sent posts
+def save_sent_posts():
+    try:
+        with open(SENT_POSTS_FILE, "w") as f:
+            json.dump(sent_posts, f)
+    except Exception as e:
+        logging.error(f"❌ Failed to save sent posts: {e}")
+
+# Init
+sent_posts = load_sent_posts()
 BASE_URL = fetch_current_domain()
 
 def get_gofile_link(intermediate_url):
@@ -60,13 +88,12 @@ def extract_all_drive_links_from_page(url):
         resp = requests.get(url, headers=HEADERS, timeout=15)
         soup = BeautifulSoup(resp.text, "html.parser")
         for a in soup.find_all("a", href=True):
-            href = a.get('href', '').strip()  # Ensure href is safely retrieved
+            href = a.get('href', '').strip()
             if href.startswith("http") and any(domain in href for domain in [
                 "hubdrive", "hubcloud", "gdflix", "gdtot", "filepress", "media.cm", "drive.google"
             ]):
                 if href not in all_links:
                     all_links.append(href)
-                # Check if the current href is a HubCloud URL
                 if "hubcloud" in href:
                     direct_links = get_hubcloud_direct_link(href)
                     if direct_links:
@@ -77,8 +104,8 @@ def extract_all_drive_links_from_page(url):
         logging.error(f"❌ Error extracting all links: {e}")
     return all_links, hubcloud_link
 
-
 async def fetch_latest_posts():
+    global sent_posts
     try:
         logging.info("🔁 Checking for latest posts...")
         response = requests.get(BASE_URL, headers=HEADERS, verify=False)
@@ -114,19 +141,11 @@ async def fetch_latest_posts():
                     post_resp = requests.get(post_url, headers=HEADERS, verify=False)
                     post_soup = BeautifulSoup(post_resp.text, 'html.parser')
 
-                    # # Watch Online
-                    # watch_online_tag = post_soup.find('a', href=True, string=lambda s: s and "WATCH ONLINE" in s.upper())
-                    # if watch_online_tag:
-                    #     watch_online_link = watch_online_tag['href']
-                    #     logging.info(f"📎 Found Watch Online link: {watch_online_link}")
-
-                    # GoFile (from SERVER 01)
                     server01_tag = post_soup.find('a', href=True, string=lambda s: s and "SERVER 01" in s.upper())
                     if server01_tag:
                         gofile_link = get_gofile_link(server01_tag['href'])
                         watch_online_link = get_streamtape_link(server01_tag['href'])
 
-                    # Google Drive Direct Links page
                     drive_links_tag = post_soup.find('a', href=True, string=lambda s: s and "Google Drive Direct Links" in s)
                     if drive_links_tag:
                         all_links, hubcloud_link = extract_all_drive_links_from_page(drive_links_tag['href'])
@@ -138,7 +157,8 @@ async def fetch_latest_posts():
                     logging.error(f"❌ Error fetching post page: {e}")
 
                 await send_to_telegram(title, watch_online_link, gofile_link, all_links, hubcloud_link)
-                sent_posts.add(post_url)
+                sent_posts[post_url] = time.time()
+                save_sent_posts()
                 count += 1
                 if count >= 6:
                     break
