@@ -5,6 +5,8 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urlparse, parse_qs
 
 # Logging setup
@@ -29,7 +31,7 @@ def get_download_links_from_redirect(redirect_url):
     Use Selenium to extract links like pixeldrain/gpdl/r2.dev after redirection.
     """
     try:
-        driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         driver.get(redirect_url)
         time.sleep(5)
 
