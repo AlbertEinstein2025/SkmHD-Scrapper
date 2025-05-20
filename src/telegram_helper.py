@@ -61,7 +61,7 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
     if poster_link:
         msg_leech = (
             f"/{CMD} {fast_server_link} -t {poster_link}\n"
-            f"Tag: @{USER_NAME} {USER_ID}"
+            f"Tag: <code>@{USER_NAME}</code> <code>{USER_ID}</code>"
         )
     else:
         msg_leech = (
