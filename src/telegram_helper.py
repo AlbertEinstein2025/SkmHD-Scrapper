@@ -30,7 +30,7 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
     all_links_cleaned = [link for link in all_links if link not in hubcloud_links]
 
     # Fetch poster link
-    poster_link = await get_poster_link(clean_title_for_poster(title))
+    poster_link = await get_poster_link(title)
 
     # Message for the update channel
     msg_default = (
