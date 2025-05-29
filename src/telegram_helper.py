@@ -82,7 +82,7 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
         logging.info("✅ Sent to Update Channel")
 
         if gofile_link or watch_online_link or hubcloud_links:
-            await bot.send_message(chat_id=CHAT_ID[1], text=msg_leech, parse_mode="HTML")
+            await bot.send_message(chat_id=CHAT_ID[1], text=msg_leech, parse_mode="HTML", disable_web_page_preview=True)
             logging.info("✅ Sent to Leech Channel")
 
     except Exception as e:
