@@ -8,11 +8,19 @@ bot = Bot(token=BOT_TOKEN)
 
 async def get_poster_link(title):
     try:
+        title_clean, year = extract_title_and_year(title)
+        if not year:
+            logging.warning(f"⚠️ Year not found in title: {title}")
+            return None
+
+        url = f"https://poster.spidy.eu.org/api/v1/get?title={title_clean}&year={year}"
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"http://64.227.160.49:8085/api?get={title}") as resp:
+            async with session.get(url) as resp:
                 if resp.status == 200:
                     data = await resp.json()
-                    return data.get("poster")
+                    return data.get("image_url")  # Updated key
+                else:
+                    logging.warning(f"⚠️ Poster API response status: {resp.status}")
     except Exception as e:
         logging.warning(f"⚠️ Poster API error: {e}")
     return None
@@ -80,12 +88,8 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
     except Exception as e:
         logging.error(f"❌ Telegram sending error: {e}")
 
-def clean_title_for_poster(title: str) -> str:
-    """
-    Extracts the 'Name (Year)' part from a full release title.
-    Example: 'El Gallo (2018) 1080p HDRip...' -> 'El Gallo (2018)'
-    """
-    match = re.search(r'^(.*?\(\d{4}\))', title)
+def extract_title_and_year(title: str):
+    match = re.search(r'^(.*?)\s*\((\d{4})\)', title)
     if match:
-        return match.group(1).strip()
-    return title.strip()
+        return match.group(1).strip(), match.group(2)
+    return title.strip(), None
