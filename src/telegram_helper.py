@@ -1,36 +1,14 @@
 import logging
-import aiohttp
 import re
 from telegram import Bot
 from .config import BOT_TOKEN, CHAT_ID, CMD, USER_NAME, USER_ID
 
 bot = Bot(token=BOT_TOKEN)
 
-async def get_poster_link(title):
-    try:
-        title_clean, year = extract_title_and_year(title)
-        if not year:
-            logging.warning(f"⚠️ Year not found in title: {title}")
-            return None
-
-        url = f"https://poster.spidy.eu.org/api/v1/get?title={title_clean}&year={year}"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    return data.get("image_url")  # Updated key
-                else:
-                    logging.warning(f"⚠️ Poster API response status: {resp.status}")
-    except Exception as e:
-        logging.warning(f"⚠️ Poster API error: {e}")
-    return None
 
 async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hubcloud_links):
     # Remove hubcloud links from all_links to avoid duplicates
     all_links_cleaned = [link for link in all_links if link not in hubcloud_links]
-
-    # Fetch poster link
-    poster_link = await get_poster_link(title)
 
     # Message for the update channel
     msg_default = (
@@ -63,16 +41,11 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
     msg_default += "\n<blockquote>🌐 <b>Scraped from <a href='https://telegram.me/LeechFlix'>SkyMoviesHD</a></b></blockquote>"
 
     # Choose a fast server link
-    fast_server_link = next((l for l in hubcloud_links if "r2.dev" in l), gofile_link or 'None')
+    fast_server_link = next(
+        (l for l in hubcloud_links if any(x in l for x in ["r2.dev", "workers.dev", "cdnbaba.xyz"])),
+        gofile_link or None)
 
-    # Message to Leech Channel with poster (if available)
-    if poster_link:
-        msg_leech = (
-            f"/{CMD} {fast_server_link} -t {poster_link}\n"
-            f"<b>Tag:</b> <code>@{USER_NAME}</code> <code>{USER_ID}</code>"
-        )
-    else:
-        msg_leech = (
+    msg_leech = (
             f"/{CMD} {fast_server_link}\n"
             f"<b>Tag:</b> <code>@{USER_NAME}</code> <code>{USER_ID}</code>"
         )
@@ -87,9 +60,3 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
 
     except Exception as e:
         logging.error(f"❌ Telegram sending error: {e}")
-
-def extract_title_and_year(title: str):
-    match = re.search(r'^(.*?)\s*\((\d{4})\)', title)
-    if match:
-        return match.group(1).strip(), match.group(2)
-    return title.strip(), None
