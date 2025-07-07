@@ -42,7 +42,7 @@ async def send_to_telegram(title, watch_online_link, gofile_link, all_links, hub
 
     # Choose a fast server link
     fast_server_link = next(
-        (l for l in hubcloud_links if any(x in l for x in ["r2.dev", "workers.dev", "cdnbaba.xyz"])),
+        (l for l in hubcloud_links if any(x in l for x in ["r2.dev", "workers.dev", "cdnbaba.xyz", "cdn3bot.xyz"])),
         gofile_link or None)
 
     msg_leech = (
